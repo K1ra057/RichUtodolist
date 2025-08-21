@@ -158,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskIndex = tasks[sourceCategory].findIndex(t => t.id === taskId);
         if (taskIndex === -1) return;
         
+        // ИСПРАВЛЕНА ОПЕЧАТКА: было source_category
         const [task] = tasks[sourceCategory].splice(taskIndex, 1);
 
         const newLiElements = [...targetList.querySelectorAll('li')];

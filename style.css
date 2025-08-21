@@ -1,26 +1,9 @@
-:root {
-  --background-color: #fffaf9;
-  --text-color: #333;
-  --primary-accent-color: #c07c7c;
-  --task-background-color: #f6f6f6;
-  --border-color: #ccc;
-  --completed-text-color: #999;
-  --border-radius-md: 10px;
-}
-
-/* Global Styles & Reset */
-*, *::before, *::after {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent; /* Убираем синюю подсветку при тапе */
-}
-
+/* Общий стиль */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: Arial, sans-serif;
   margin: 0;
-  background-color: var(--background-color);
-  color: var(--text-color);
-  font-size: 16px; /* Базовый размер шрифта для мобильных */
-  overscroll-behavior-y: contain; /* Предотвращает "pull-to-refresh" */
+  background: #fffaf9;
+  color: #333;
 }
 
 .container {
@@ -30,21 +13,19 @@ body {
 }
 
 header h1 {
-  font-size: 2.2rem;
+  font-size: 2rem;
   margin-bottom: 1rem;
   text-align: center;
 }
 
 .category {
   font-size: 0.9rem;
-  color: var(--primary-accent-color);
+  color: #c07c7c;
   margin: 1.5rem 0 0.5rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-weight: bold;
 }
 
-/* Task List */
 .task-list {
   list-style: none;
   padding: 0;
@@ -53,112 +34,98 @@ header h1 {
 }
 
 .task-list li {
-  background-color: var(--task-background-color);
-  margin-bottom: 0.5rem;
-  padding: 0.5rem 0.8rem;
-  border-radius: var(--border-radius-md);
+  background: #f6f6f6;
+  margin-bottom: 0.6rem;
+  padding: 0.8rem;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.task-list li:hover {
-  background-color: var(--task-hover-background-color);
+  gap: 0.6rem;
+  cursor: grab;
+  transition: all 0.2s ease;
 }
 
 .task-list li.dragging {
-  opacity: 0.7;
-  transform: scale(1.05);
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.task-list li:hover {
+  background: #eaeaea;
 }
 
 .task-list label {
   flex: 1;
-  line-height: 1.4;
-  overflow-wrap: break-word;
-  word-break: break-word;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 .task-list input[type="checkbox"] {
-  width: 24px; /* Удобный размер для касания */
-  height: 24px;
-  flex-shrink: 0;
+  transform: scale(1.2);
+  cursor: pointer;
 }
 
-/* Style for the checked state */
-.task-list input[type="checkbox"]:checked {
-  accent-color: var(--completed-text-color);
-}
-
-.task-list .delete-btn {
+.task-list button {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  padding: 10px; /* Увеличиваем область касания */
-  flex-shrink: 0;
-  line-height: 1;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Styles for the completed task LI element */
-.task-list li.completed {
-  opacity: 0.6;
-}
-
-/* The label inside a completed task */
-.task-list li.completed label {
+.completed {
   text-decoration: line-through;
+  color: #999;
 }
 
-
-/* Form */
+/* Форма */
 #task-form {
   display: flex;
-  margin-top: 1.5rem;
+  align-items: center;
   gap: 0.5rem;
-}
-
-#task-input,
-#task-category,
-#task-form button {
-  padding: 0.8rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  font-size: 1rem;
+  margin-top: 1rem;
 }
 
 #task-input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 120px; /* Минимальная ширина для поля ввода */
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+#task-category {
+  flex: 0 1 auto;
+  min-width: 80px; /* Минимальная ширина для выпадающего меню */
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
 }
 
 #task-form button {
-  background-color: var(--text-color);
+  flex: 0 0 auto;
+  background: #333;
   color: white;
+  border: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
   font-weight: bold;
+  transition: background 0.2s;
 }
 
-/* Empty List Placeholder */
-.task-list:empty::after {
-  content: "No tasks yet";
-  display: block;
-  padding: 1rem;
-  text-align: center;
-  color: var(--completed-text-color);
-  font-style: italic;
+#task-form button:hover {
+  background: #555;
 }
 
-/* Accessibility */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-
-/* Responsive */
+/* Адаптив */
 @media (min-width: 481px) {
   body {
     display: flex;
@@ -168,8 +135,18 @@ header h1 {
   }
   
   .container {
-    box-shadow: 0 0 15px var(--box-shadow-color);
-    border-radius: var(--border-radius-lg);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
     margin: 2rem auto;
   }
+}
+
+/* Стиль для пустых списков */
+.task-list:empty::after {
+  content: "No tasks yet";
+  display: block;
+  padding: 1rem;
+  text-align: center;
+  color: #999;
+  font-style: italic;
 }
