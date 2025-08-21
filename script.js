@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let draggedItem = null;
+    let touchTimer = null; // Таймер для определения долгого нажатия
 
 
     const saveTasks = () => {
@@ -100,20 +101,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Touch Event Handlers ---
 
     function handleTouchStart(e) {
-        // Do not allow dragging for completed tasks
+        // Не перетаскиваем выполненные задачи
         if (e.currentTarget.classList.contains('completed')) {
             return;
         }
-        // Prevent scrolling while dragging
-        e.preventDefault(); 
-        draggedItem = e.currentTarget;
-        draggedItem.classList.add("dragging");
-        document.addEventListener("touchmove", handleTouchMove, { passive: false });
+        
+        // Запускаем таймер. Если пользователь удержит палец, начнётся перетаскивание.
+        touchTimer = setTimeout(() => {
+            // e.preventDefault() вызываем только когда перетаскивание началось,
+            // чтобы не блокировать обычный клик.
+            e.preventDefault(); 
+            draggedItem = e.currentTarget;
+            draggedItem.classList.add("dragging");
+            document.addEventListener("touchmove", handleTouchMove, { passive: false });
+        }, 300); // 300ms задержка для начала перетаскивания
     }
 
     function handleTouchMove(e) {
-        e.preventDefault();
+        // Если пользователь начал двигать пальцем до того, как сработал таймер,
+        // отменяем перетаскивание. Это позволяет скроллить страницу.
+        clearTimeout(touchTimer);
+
         if (!draggedItem) return;
+        e.preventDefault();
 
         const touch = e.touches[0];
         const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -131,6 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleTouchEnd() {
+        // Если пользователь отпустил палец до того, как сработал таймер,
+        // это считается обычным тапом, и перетаскивание не начнётся.
+        clearTimeout(touchTimer);
+
         document.removeEventListener("touchmove", handleTouchMove);
         if (!draggedItem) return;
 
