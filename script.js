@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskLists = document.querySelectorAll(".task-list");
 
     // State
-    let tasks = JSON.parse(localStorage.getItem("tasks")) || {
+    const tasks = JSON.parse(localStorage.getItem("tasks")) || {
         design: [
             { id: 1, text: "Create icons for a dashboard", done: false },
             { id: 2, text: "Plan your meal", done: false },
@@ -30,10 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
         taskLists.forEach(list => {
             list.innerHTML = ""; // Clear existing tasks
             const category = list.id;
-            tasks[category].forEach((task) => {
-                const taskElement = createTaskElement(task, category);
-                list.appendChild(taskElement);
-            });
+            if (tasks[category]) {
+                tasks[category].forEach((task) => {
+                    const taskElement = createTaskElement(task, category);
+                    list.appendChild(taskElement); // Correctly append the created element
+                });
+            }
         });
     };
 
@@ -85,6 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const category = taskCategorySelect.value;
         if (text) {
             const newTask = { id: Date.now(), text, done: false };
+            if (!tasks[category]) {
+                tasks[category] = [];
+            }
             tasks[category].push(newTask);
             saveTasks();
             renderTasks();
@@ -95,47 +100,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleDragStart(e) {
         draggedItem = e.target;
-        setTimeout(() => e.target.classList.add("dragging"), 0);
+        setTimeout(() => {
+            if (draggedItem) {
+                draggedItem.classList.add("dragging");
+            }
+        }, 0);
     }
 
-    function handleDragEnd(e) {
-        e.target.classList.remove("dragging");
+    function handleDragEnd() {
+        if (draggedItem) {
+            draggedItem.classList.remove("dragging");
+        }
         draggedItem = null;
     }
 
     function handleDragOver(e) {
         e.preventDefault();
-        const list = e.target.closest('.task-list');
-        if (!list || !draggedItem) return;
-
-        const afterElement = getDragAfterElement(list, e.clientY);
-        if (afterElement == null) {
-            list.appendChild(draggedItem);
-        } else {
-            list.insertBefore(draggedItem, afterElement);
-        }
     }
 
     function handleDrop(e) {
         e.preventDefault();
+        if (!draggedItem) return;
+
         const targetList = e.target.closest('.task-list');
-        if (!targetList || !draggedItem) return;
+        if (!targetList) return;
 
         const sourceCategory = draggedItem.dataset.category;
         const targetCategory = targetList.id;
         const taskId = Number(draggedItem.dataset.id);
 
-        // Find and move the task in the data model
+        // Find the task to move
         const taskIndex = tasks[sourceCategory].findIndex(t => t.id === taskId);
+        if (taskIndex === -1) return;
+        
         const [task] = tasks[sourceCategory].splice(taskIndex, 1);
+
+        // Find where to insert it
+        const afterElement = getDragAfterElement(targetList, e.clientY);
         
-        const newLiElements = [...targetList.querySelectorAll('li')];
-        const newIndex = newLiElements.indexOf(draggedItem);
-        
-        tasks[targetCategory].splice(newIndex, 0, task);
+        if (afterElement) {
+            const afterId = Number(afterElement.dataset.id);
+            const newIndex = tasks[targetCategory].findIndex(t => t.id === afterId);
+            tasks[targetCategory].splice(newIndex, 0, task);
+        } else {
+            tasks[targetCategory].push(task);
+        }
 
         saveTasks();
-        renderTasks(); // Re-render to ensure data attributes are correct
+        renderTasks();
     }
 
     const getDragAfterElement = (container, y) => {
