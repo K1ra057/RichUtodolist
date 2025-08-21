@@ -79,10 +79,12 @@ header h1 {
   overflow-wrap: break-word;
   word-break: break-word;
   min-width: 0;
+  cursor: pointer; /* Указываем, что на элемент можно нажать */
 }
 
 .task-list input[type="checkbox"] {
-  transform: scale(1.2);
+  transform: scale(1.5); /* Увеличиваем размер чекбокса */
+  margin-right: 0.3rem; /* Добавляем небольшой отступ */
   flex-shrink: 0;
 }
 

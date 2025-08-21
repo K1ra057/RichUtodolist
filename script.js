@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = task.done;
+        checkbox.id = `task-${task.id}`; // 1. Даем чекбоксу уникальный ID
+
         checkbox.addEventListener("change", () => {
             task.done = checkbox.checked;
             li.classList.toggle("completed", task.done);
@@ -55,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const label = document.createElement("label");
         label.textContent = task.text;
+        label.htmlFor = `task-${task.id}`; // 2. Связываем label с чекбоксом по ID
 
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "X";
