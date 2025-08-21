@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createTaskElement = (task, category) => {
         const li = document.createElement("li");
-        li.draggable = true;
+        // li.draggable = true; // Not needed for touch
         li.dataset.id = task.id;
         li.dataset.category = category;
         if (task.done) {
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         label.textContent = task.text;
 
         const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "❌";
+        deleteBtn.textContent = "X";
         deleteBtn.className = "delete-btn";
         deleteBtn.setAttribute("aria-label", `Delete task: ${task.text}`);
         deleteBtn.addEventListener("click", () => {
@@ -72,20 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         li.append(checkbox, label, deleteBtn);
 
-        // Mouse Drag and Drop Listeners
-        li.addEventListener("dragstart", handleDragStart);
-        li.addEventListener("dragend", handleDragEnd);
-
         // Touch Drag and Drop Listeners
         li.addEventListener("touchstart", handleTouchStart, { passive: false });
         li.addEventListener("touchend", handleTouchEnd);
         li.addEventListener("touchcancel", handleTouchEnd);
 
-
         return li;
     };
 
-    // --- Mouse Event Handlers ---
+    // --- Event Handlers ---
 
     const handleTaskFormSubmit = (e) => {
         e.preventDefault();
@@ -104,40 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    function handleDragStart(e) {
-        draggedItem = e.target;
-        setTimeout(() => {
-            if (draggedItem) {
-                draggedItem.classList.add("dragging");
-            }
-        }, 0);
-    }
-
-    function handleDragEnd() {
-        if (draggedItem) {
-            draggedItem.classList.remove("dragging");
-        }
-        draggedItem = null;
-    }
-
-    function handleDragOver(e) {
-        e.preventDefault();
-    }
-
-    function handleDrop(e) {
-        e.preventDefault();
-        if (!draggedItem) return;
-
-        const targetList = e.target.closest('.task-list');
-        if (!targetList) return;
-
-        updateTaskOrder(draggedItem, targetList);
-    }
-
     // --- Touch Event Handlers ---
 
     function handleTouchStart(e) {
-        e.preventDefault(); // Prevent scrolling
+        // Prevent scrolling while dragging
+        e.preventDefault(); 
         draggedItem = e.currentTarget;
         draggedItem.classList.add("dragging");
         document.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -171,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTaskOrder(draggedItem, targetList);
         }
         
-        // Cleanup for touch
+        // Cleanup
         draggedItem.classList.remove("dragging");
         draggedItem = null;
     }
@@ -216,10 +182,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initialization ---
 
     taskForm.addEventListener("submit", handleTaskFormSubmit);
-    taskLists.forEach(list => {
-        list.addEventListener("dragover", handleDragOver);
-        list.addEventListener("drop", handleDrop);
-    });
-
     renderTasks();
 });
