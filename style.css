@@ -93,11 +93,12 @@ header h1 {
 
 #task-input {
   flex: 1 1 auto;
-  min-width: 120px; /* Минимальная ширина для поля ввода */
-  padding: 0.8rem;
-  border-radius: 8px;
+  min-width: 120px; 
+  padding: 0.5rem; 
+  border-radius: 6px; 
   border: 1px solid #ccc;
-  font-size: 0.9rem;
+  font-size: 0.8rem; 
+  height: 2rem; 
 }
 
 #task-category {
