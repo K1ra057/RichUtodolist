@@ -20,6 +20,7 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   font-size: 16px; /* Базовый размер шрифта для мобильных */
+  overscroll-behavior-y: contain; /* Предотвращает "pull-to-refresh" */
 }
 
 .container {
@@ -137,7 +138,7 @@ header h1 {
 
 /* Empty List Placeholder */
 .task-list:empty::after {
-  content: "Задач пока нет";
+  content: "No tasks yet";
   display: block;
   padding: 1rem;
   text-align: center;

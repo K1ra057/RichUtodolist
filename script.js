@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskLists = document.querySelectorAll(".task-list");
 
     // State
-    let tasks = JSON.parse(localStorage.getItem("tasks")) || {
+    const tasks = JSON.parse(localStorage.getItem("tasks")) || {
         design: [],
         personal: [],
         house: [],
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         li.append(checkbox, label, deleteBtn);
 
         // Touch Listeners for Drag & Drop
-        li.addEventListener("touchstart", handleTouchStart, { passive: true });
+        li.addEventListener("touchstart", handleTouchStart, { passive: false });
         li.addEventListener("touchend", handleTouchEnd);
         li.addEventListener("touchcancel", handleTouchEnd);
 
@@ -99,16 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (li.classList.contains('completed')) return;
 
         touchTimer = setTimeout(() => {
+            e.preventDefault(); // Prevent click event after long press
             draggedItem = li;
             draggedItem.classList.add("dragging");
             document.addEventListener("touchmove", handleTouchMove, { passive: false });
-        }, 350); // Задержка для начала перетаскивания
+        }, 350); // Delay to initiate drag
     }
 
     function handleTouchMove(e) {
-        clearTimeout(touchTimer); // Отменяем таймер, если начался скролл
+        clearTimeout(touchTimer);
         if (!draggedItem) return;
-        e.preventDefault(); // Запрещаем скролл страницы, когда перетаскиваем
+        e.preventDefault(); // Prevent page scroll while dragging
 
         const touch = e.touches[0];
         const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
