@@ -71,6 +71,7 @@ header h1 {
 .task-list li.dragging {
   opacity: 0.5;
   transform: rotate(3deg);
+  user-select: none; /* Prevent text selection during drag */
 }
 
 .task-list label {
