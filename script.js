@@ -1,24 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
     const taskForm = document.getElementById("task-form");
     const taskInput = document.getElementById("task-input");
     const taskCategorySelect = document.getElementById("task-category");
     const taskLists = document.querySelectorAll(".task-list");
 
-    const tasks = JSON.parse(localStorage.getItem("tasks")) || {
-        design: [
-            { id: 1, text: "Create icons for a dashboard", done: false },
-            { id: 2, text: "Plan your meal", done: false },
-        ],
-        personal: [
-            { id: 3, text: "Review daily goals", done: false },
-            { id: 4, text: "Stretch for 15 minutes", done: false },
-        ],
-        house: [{ id: 5, text: "Water indoor plants", done: false }],
+    // State
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || {
+        design: [],
+        personal: [],
+        house: [],
     };
 
     let draggedItem = null;
-    let touchTimer = null; // Таймер для определения долгого нажатия
+    let touchTimer = null;
 
+    // --- Core Functions ---
 
     const saveTasks = () => {
         localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -26,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderTasks = () => {
         taskLists.forEach(list => {
-            list.innerHTML = ""; // Clear existing tasks
+            list.innerHTML = "";
             const category = list.id;
             if (tasks[category]) {
                 tasks[category].forEach((task) => {
@@ -48,8 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = task.done;
-        checkbox.id = `task-${task.id}`; // 1. Даем чекбоксу уникальный ID
-
+        checkbox.id = `task-${task.id}`;
         checkbox.addEventListener("change", () => {
             task.done = checkbox.checked;
             li.classList.toggle("completed", task.done);
@@ -58,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const label = document.createElement("label");
         label.textContent = task.text;
-        label.htmlFor = `task-${task.id}`; // 2. Связываем label с чекбоксом по ID
+        label.htmlFor = `task-${task.id}`;
 
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "X";
@@ -72,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         li.append(checkbox, label, deleteBtn);
 
-        li.addEventListener("touchstart", handleTouchStart, { passive: false });
+        // Touch Listeners for Drag & Drop
+        li.addEventListener("touchstart", handleTouchStart, { passive: true });
         li.addEventListener("touchend", handleTouchEnd);
         li.addEventListener("touchcancel", handleTouchEnd);
 
@@ -87,43 +84,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const category = taskCategorySelect.value;
         if (text) {
             const newTask = { id: Date.now(), text, done: false };
-            if (!tasks[category]) {
-                tasks[category] = [];
-            }
+            if (!tasks[category]) tasks[category] = [];
             tasks[category].push(newTask);
             saveTasks();
             renderTasks();
             taskInput.value = "";
-            taskInput.focus();
         }
     };
 
-    // --- Touch Event Handlers ---
+    // --- Touch Handlers for Drag & Drop ---
 
     function handleTouchStart(e) {
-        // Не перетаскиваем выполненные задачи
-        if (e.currentTarget.classList.contains('completed')) {
-            return;
-        }
-        
-        // Запускаем таймер. Если пользователь удержит палец, начнётся перетаскивание.
+        const li = e.currentTarget;
+        if (li.classList.contains('completed')) return;
+
         touchTimer = setTimeout(() => {
-            // e.preventDefault() вызываем только когда перетаскивание началось,
-            // чтобы не блокировать обычный клик.
-            e.preventDefault(); 
-            draggedItem = e.currentTarget;
+            draggedItem = li;
             draggedItem.classList.add("dragging");
             document.addEventListener("touchmove", handleTouchMove, { passive: false });
-        }, 300); // 300ms задержка для начала перетаскивания
+        }, 350); // Задержка для начала перетаскивания
     }
 
     function handleTouchMove(e) {
-        // Если пользователь начал двигать пальцем до того, как сработал таймер,
-        // отменяем перетаскивание. Это позволяет скроллить страницу.
-        clearTimeout(touchTimer);
-
+        clearTimeout(touchTimer); // Отменяем таймер, если начался скролл
         if (!draggedItem) return;
-        e.preventDefault();
+        e.preventDefault(); // Запрещаем скролл страницы, когда перетаскиваем
 
         const touch = e.touches[0];
         const elementUnder = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -132,19 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetList = elementUnder.closest('.task-list');
         if (targetList) {
             const afterElement = getDragAfterElement(targetList, touch.clientY);
-            if (afterElement == null) {
-                targetList.appendChild(draggedItem);
-            } else {
-                targetList.insertBefore(draggedItem, afterElement);
-            }
+            targetList.insertBefore(draggedItem, afterElement);
         }
     }
 
     function handleTouchEnd() {
-        // Если пользователь отпустил палец до того, как сработал таймер,
-        // это считается обычным тапом, и перетаскивание не начнётся.
         clearTimeout(touchTimer);
-
         document.removeEventListener("touchmove", handleTouchMove);
         if (!draggedItem) return;
 
@@ -152,11 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetList) {
             updateTaskOrder(draggedItem, targetList);
         }
-        
-        // Cleanup
         draggedItem.classList.remove("dragging");
         draggedItem = null;
     }
+
+    // --- Utility Functions ---
 
     const getDragAfterElement = (container, y) => {
         const draggableElements = [...container.querySelectorAll("li:not(.dragging)")];
@@ -164,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const box = child.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
             if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
+                return { offset, element: child };
             } else {
                 return closest;
             }
@@ -184,15 +162,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const newLiElements = [...targetList.querySelectorAll('li')];
         const newIndex = newLiElements.indexOf(item);
         
-        if (!tasks[targetCategory]) {
-            tasks[targetCategory] = [];
-        }
+        if (!tasks[targetCategory]) tasks[targetCategory] = [];
         tasks[targetCategory].splice(newIndex, 0, task);
 
         saveTasks();
         renderTasks();
     };
 
+    // --- Initialization ---
     taskForm.addEventListener("submit", handleTaskFormSubmit);
     renderTasks();
 });
