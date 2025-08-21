@@ -86,6 +86,11 @@ header h1 {
   flex-shrink: 0;
 }
 
+/* Style for the checked state */
+.task-list input[type="checkbox"]:checked {
+  accent-color: var(--completed-text-color);
+}
+
 .task-list .delete-btn {
   background: none;
   border: none;
@@ -100,10 +105,16 @@ header h1 {
   flex-shrink: 0;
 }
 
-.completed {
-  text-decoration: line-through;
-  color: var(--completed-text-color);
+/* Styles for the completed task LI element */
+.task-list li.completed {
+  opacity: 0.6;
 }
+
+/* The label inside a completed task */
+.task-list li.completed label {
+  text-decoration: line-through;
+}
+
 
 /* Form */
 #task-form {

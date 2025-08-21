@@ -1,11 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
     const taskForm = document.getElementById("task-form");
     const taskInput = document.getElementById("task-input");
     const taskCategorySelect = document.getElementById("task-category");
     const taskLists = document.querySelectorAll(".task-list");
 
-    // State
     const tasks = JSON.parse(localStorage.getItem("tasks")) || {
         design: [
             { id: 1, text: "Create icons for a dashboard", done: false },
@@ -20,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let draggedItem = null;
 
-    // --- Core Functions ---
 
     const saveTasks = () => {
         localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -41,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createTaskElement = (task, category) => {
         const li = document.createElement("li");
-        // li.draggable = true; // Not needed for touch
         li.dataset.id = task.id;
         li.dataset.category = category;
         if (task.done) {
@@ -72,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         li.append(checkbox, label, deleteBtn);
 
-        // Touch Drag and Drop Listeners
         li.addEventListener("touchstart", handleTouchStart, { passive: false });
         li.addEventListener("touchend", handleTouchEnd);
         li.addEventListener("touchcancel", handleTouchEnd);
@@ -102,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Touch Event Handlers ---
 
     function handleTouchStart(e) {
+        // Do not allow dragging for completed tasks
+        if (e.currentTarget.classList.contains('completed')) {
+            return;
+        }
         // Prevent scrolling while dragging
         e.preventDefault(); 
         draggedItem = e.currentTarget;
@@ -142,8 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
         draggedItem = null;
     }
 
-    // --- Utility Functions ---
-
     const getDragAfterElement = (container, y) => {
         const draggableElements = [...container.querySelectorAll("li:not(.dragging)")];
         return draggableElements.reduce((closest, child) => {
@@ -178,8 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveTasks();
         renderTasks();
     };
-
-    // --- Initialization ---
 
     taskForm.addEventListener("submit", handleTaskFormSubmit);
     renderTasks();
