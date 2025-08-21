@@ -1,157 +1,163 @@
-const taskForm = document.getElementById("task-form");
-const taskInput = document.getElementById("task-input");
-const taskCategory = document.getElementById("task-category");
-let tasks = JSON.parse(localStorage.getItem("tasks")) || {
-  design: [
-    { text: "Create icons for a dashboard", done: false },
-    { text: "Plan your meal", done: false },
-    { text: "Prepare a design presentation", done: false },
-  ],
-  personal: [
-    {
-      text: "Review daily goals before sleeping. Add some new if time permits",
-      done: false,
-    },
-    { text: "Stretch for 15 minutes", done: false },
-  ],
-  house: [{ text: "Water indoor plants", done: false }],
-};
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM Elements
+    const taskForm = document.getElementById("task-form");
+    const taskInput = document.getElementById("task-input");
+    const taskCategorySelect = document.getElementById("task-category");
+    const taskLists = document.querySelectorAll(".task-list");
 
-let draggedItem = null;
-let sourceCategory = null;
+    // State
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || {
+        design: [
+            { id: 1, text: "Create icons for a dashboard", done: false },
+            { id: 2, text: "Plan your meal", done: false },
+        ],
+        personal: [
+            { id: 3, text: "Review daily goals", done: false },
+            { id: 4, text: "Stretch for 15 minutes", done: false },
+        ],
+        house: [{ id: 5, text: "Water indoor plants", done: false }],
+    };
 
-function renderTasks() {
-  ["design", "personal", "house"].forEach((cat) => {
-    const ul = document.getElementById(cat);
-    ul.innerHTML = "";
-    
-    if (tasks[cat].length === 0) {
-      return; // Используем CSS псевдоэлемент для отображения сообщения
+    let draggedItem = null;
+
+    // --- Core Functions ---
+
+    const saveTasks = () => {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    };
+
+    const renderTasks = () => {
+        taskLists.forEach(list => {
+            list.innerHTML = ""; // Clear existing tasks
+            const category = list.id;
+            tasks[category].forEach((task) => {
+                const taskElement = createTaskElement(task, category);
+                list.appendChild(taskElement);
+            });
+        });
+    };
+
+    const createTaskElement = (task, category) => {
+        const li = document.createElement("li");
+        li.draggable = true;
+        li.dataset.id = task.id;
+        li.dataset.category = category;
+        if (task.done) {
+            li.classList.add("completed");
+        }
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.done;
+        checkbox.addEventListener("change", () => {
+            task.done = checkbox.checked;
+            li.classList.toggle("completed", task.done);
+            saveTasks();
+        });
+
+        const label = document.createElement("label");
+        label.textContent = task.text;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "❌";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.setAttribute("aria-label", `Delete task: ${task.text}`);
+        deleteBtn.addEventListener("click", () => {
+            tasks[category] = tasks[category].filter(t => t.id !== task.id);
+            saveTasks();
+            renderTasks();
+        });
+
+        li.append(checkbox, label, deleteBtn);
+
+        // Drag and Drop Listeners
+        li.addEventListener("dragstart", handleDragStart);
+        li.addEventListener("dragend", handleDragEnd);
+
+        return li;
+    };
+
+    // --- Event Handlers ---
+
+    const handleTaskFormSubmit = (e) => {
+        e.preventDefault();
+        const text = taskInput.value.trim();
+        const category = taskCategorySelect.value;
+        if (text) {
+            const newTask = { id: Date.now(), text, done: false };
+            tasks[category].push(newTask);
+            saveTasks();
+            renderTasks();
+            taskInput.value = "";
+            taskInput.focus();
+        }
+    };
+
+    function handleDragStart(e) {
+        draggedItem = e.target;
+        setTimeout(() => e.target.classList.add("dragging"), 0);
     }
-    
-    tasks[cat].forEach((task, index) => {
-      const li = document.createElement("li");
-      li.draggable = true;
-      li.dataset.category = cat;
-      li.dataset.index = index;
 
-      li.innerHTML = `
-        <input type="checkbox" ${task.done ? "checked" : ""}>
-        <label class="${task.done ? "completed" : ""}">${task.text}</label>
-        <button onclick="deleteTask('${cat}', ${index})">❌</button>
-      `;
-
-      li.querySelector("input").addEventListener("change", (e) => {
-        tasks[cat][index].done = e.target.checked;
-        saveTasks();
-        renderTasks(); // Перерисовываем чтобы обновить стили
-      });
-
-      li.addEventListener("dragstart", (e) => {
-        draggedItem = li;
-        sourceCategory = cat;
-        setTimeout(() => li.classList.add("dragging"), 0);
-      });
-
-      li.addEventListener("dragend", () => {
-        li.classList.remove("dragging");
+    function handleDragEnd(e) {
+        e.target.classList.remove("dragging");
         draggedItem = null;
-        sourceCategory = null;
-      });
+    }
 
-      ul.appendChild(li);
+    function handleDragOver(e) {
+        e.preventDefault();
+        const list = e.target.closest('.task-list');
+        if (!list || !draggedItem) return;
+
+        const afterElement = getDragAfterElement(list, e.clientY);
+        if (afterElement == null) {
+            list.appendChild(draggedItem);
+        } else {
+            list.insertBefore(draggedItem, afterElement);
+        }
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const targetList = e.target.closest('.task-list');
+        if (!targetList || !draggedItem) return;
+
+        const sourceCategory = draggedItem.dataset.category;
+        const targetCategory = targetList.id;
+        const taskId = Number(draggedItem.dataset.id);
+
+        // Find and move the task in the data model
+        const taskIndex = tasks[sourceCategory].findIndex(t => t.id === taskId);
+        const [task] = tasks[sourceCategory].splice(taskIndex, 1);
+        
+        const newLiElements = [...targetList.querySelectorAll('li')];
+        const newIndex = newLiElements.indexOf(draggedItem);
+        
+        tasks[targetCategory].splice(newIndex, 0, task);
+
+        saveTasks();
+        renderTasks(); // Re-render to ensure data attributes are correct
+    }
+
+    const getDragAfterElement = (container, y) => {
+        const draggableElements = [...container.querySelectorAll("li:not(.dragging)")];
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    };
+
+    // --- Initialization ---
+
+    taskForm.addEventListener("submit", handleTaskFormSubmit);
+    taskLists.forEach(list => {
+        list.addEventListener("dragover", handleDragOver);
+        list.addEventListener("drop", handleDrop);
     });
-  });
-}
 
-function saveTasks() {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-}
-
-taskForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const text = taskInput.value.trim();
-  const category = taskCategory.value;
-  
-  if (text) {
-    tasks[category].push({ text, done: false });
-    taskInput.value = "";
-    saveTasks();
     renderTasks();
-  }
 });
-
-function deleteTask(category, index) {
-  tasks[category].splice(index, 1);
-  saveTasks();
-  renderTasks();
-}
-
-// DragOver для списков
-document.querySelectorAll(".task-list").forEach((list) => {
-  list.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    const afterElement = getDragAfterElement(list, e.clientY);
-    const dragging = document.querySelector(".dragging");
-    
-    if (dragging) {
-      if (afterElement == null) {
-        list.appendChild(dragging);
-      } else {
-        list.insertBefore(dragging, afterElement);
-      }
-    }
-  });
-
-  list.addEventListener("drop", (e) => {
-    e.preventDefault();
-    if (!draggedItem) return;
-
-    const targetCategory = list.id;
-    const items = Array.from(list.querySelectorAll("li:not(.dragging)"));
-    const newIndex = items.indexOf(draggedItem) !== -1 ? 
-      items.indexOf(draggedItem) : items.length;
-
-    // Перемещаем задачу между категориями
-    if (sourceCategory !== targetCategory) {
-      const taskIndex = parseInt(draggedItem.dataset.index);
-      const task = tasks[sourceCategory][taskIndex];
-      
-      // Удаляем из исходной категории
-      tasks[sourceCategory].splice(taskIndex, 1);
-      // Добавляем в новую категорию
-      tasks[targetCategory].splice(newIndex, 0, task);
-    } 
-    // Перемещаем внутри категории
-    else {
-      const fromIndex = parseInt(draggedItem.dataset.index);
-      const toIndex = newIndex;
-      
-      if (fromIndex !== toIndex) {
-        const [task] = tasks[sourceCategory].splice(fromIndex, 1);
-        tasks[targetCategory].splice(toIndex, 0, task);
-      }
-    }
-
-    saveTasks();
-    renderTasks();
-  });
-});
-
-function getDragAfterElement(container, y) {
-  const elements = [...container.querySelectorAll("li:not(.dragging)")];
-  
-  return elements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-// Инициализация
-renderTasks();

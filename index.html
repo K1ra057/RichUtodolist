@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A simple and elegant task manager to help you organize your day.">
     <title>Today - Task Manager</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,32 +14,35 @@
             <h1>Today</h1>
         </header>
 
-        <section class="task-section">
-            <h2 class="category">DESIGN</h2>
-            <ul id="design" class="task-list"></ul>
+        <section aria-labelledby="design-heading">
+            <h2 id="design-heading" class="category">DESIGN</h2>
+            <ul id="design" class="task-list" aria-live="polite"></ul>
         </section>
 
-        <section class="task-section">
-            <h2 class="category">PERSONAL</h2>
-            <ul id="personal" class="task-list"></ul>
+        <section aria-labelledby="personal-heading">
+            <h2 id="personal-heading" class="category">PERSONAL</h2>
+            <ul id="personal" class="task-list" aria-live="polite"></ul>
         </section>
 
-        <section class="task-section">
-            <h2 class="category">HOUSE</h2>
-            <ul id="house" class="task-list"></ul>
+        <section aria-labelledby="house-heading">
+            <h2 id="house-heading" class="category">HOUSE</h2>
+            <ul id="house" class="task-list" aria-live="polite"></ul>
         </section>
 
-        <form id="task-form">
-            <input type="text" id="task-input" placeholder="Write a task..." required>
-            <select id="task-category">
+        <form id="task-form" aria-label="Add new task">
+            <label for="task-input" class="visually-hidden">New task description</label>
+            <input type="text" id="task-input" placeholder="Write a task..." required autocomplete="off">
+            
+            <label for="task-category" class="visually-hidden">Task category</label>
+            <select id="task-category" aria-label="Select category">
                 <option value="design">DESIGN</option>
                 <option value="personal">PERSONAL</option>
                 <option value="house">HOUSE</option>
             </select>
-            <button type="submit">Add</button>
+            <button type="submit" aria-label="Add task">Add</button>
         </form>
     </main>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>

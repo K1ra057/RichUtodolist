@@ -1,9 +1,27 @@
-/* Загальний стиль */
+:root {
+  --background-color: #fffaf9;
+  --text-color: #333;
+  --primary-accent-color: #c07c7c;
+  --task-background-color: #f6f6f6;
+  --task-hover-background-color: #eaeaea;
+  --border-color: #ccc;
+  --completed-text-color: #999;
+  --box-shadow-color: rgba(0, 0, 0, 0.1);
+  --border-radius-sm: 8px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 12px;
+}
+
+/* Global Styles & Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
-  background: #fffaf9;
-  color: #333;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 .container {
@@ -20,12 +38,13 @@ header h1 {
 
 .category {
   font-size: 0.9rem;
-  color: #c07c7c;
+  color: var(--primary-accent-color);
   margin: 1.5rem 0 0.5rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
+/* Task List */
 .task-list {
   list-style: none;
   padding: 0;
@@ -34,24 +53,24 @@ header h1 {
 }
 
 .task-list li {
-  background: #f6f6f6;
+  background-color: var(--task-background-color);
   margin-bottom: 0.6rem;
   padding: 0.8rem;
-  border-radius: 10px;
+  border-radius: var(--border-radius-md);
   display: flex;
   align-items: center;
   gap: 0.6rem;
   cursor: grab;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.task-list li:hover {
+  background-color: var(--task-hover-background-color);
 }
 
 .task-list li.dragging {
   opacity: 0.5;
-  transform: rotate(5deg);
-}
-
-.task-list li:hover {
-  background: #eaeaea;
+  transform: rotate(3deg);
 }
 
 .task-list label {
@@ -63,9 +82,10 @@ header h1 {
 .task-list input[type="checkbox"] {
   transform: scale(1.2);
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-.task-list button {
+.task-list .delete-btn {
   background: none;
   border: none;
   cursor: pointer;
@@ -76,14 +96,15 @@ header h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .completed {
   text-decoration: line-through;
-  color: #999;
+  color: var(--completed-text-color);
 }
 
-/* Форма */
+/* Form */
 #task-form {
   display: flex;
   margin-top: 1rem;
@@ -93,32 +114,57 @@ header h1 {
 #task-input,
 #task-category {
   padding: 0.8rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  flex: 1;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
   font-size: 0.9rem;
 }
 
+#task-input {
+  flex: 1;
+}
+
 #task-category {
-  flex: 0.6;
+  flex-basis: 120px;
 }
 
 #task-form button {
-  background: #333;
+  background-color: var(--text-color);
   color: white;
   border: none;
   padding: 0.8rem 1rem;
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
   font-weight: bold;
-  transition: background 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 #task-form button:hover {
-  background: #555;
+  background-color: #555;
 }
 
-/* Адаптив */
+/* Empty List Placeholder */
+.task-list:empty::after {
+  content: "No tasks yet";
+  display: block;
+  padding: 1rem;
+  text-align: center;
+  color: var(--completed-text-color);
+  font-style: italic;
+}
+
+/* Accessibility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Responsive */
 @media (min-width: 481px) {
   body {
     display: flex;
@@ -128,18 +174,8 @@ header h1 {
   }
   
   .container {
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    border-radius: 12px;
+    box-shadow: 0 0 15px var(--box-shadow-color);
+    border-radius: var(--border-radius-lg);
     margin: 2rem auto;
   }
-}
-
-/* Стиль для пустых списков */
-.task-list:empty::after {
-  content: "No tasks yet";
-  display: block;
-  padding: 1rem;
-  text-align: center;
-  color: #999;
-  font-style: italic;
 }
