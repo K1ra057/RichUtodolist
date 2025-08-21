@@ -77,6 +77,9 @@ header h1 {
   flex: 1;
   font-size: 0.9rem;
   cursor: pointer;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .task-list input[type="checkbox"] {
