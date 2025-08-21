@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today - Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>Today</h1>
+        </header>
+
+        <section class="task-section">
+            <h2 class="category">DESIGN</h2>
+            <ul id="design" class="task-list"></ul>
+        </section>
+
+        <section class="task-section">
+            <h2 class="category">PERSONAL</h2>
+            <ul id="personal" class="task-list"></ul>
+        </section>
+
+        <section class="task-section">
+            <h2 class="category">HOUSE</h2>
+            <ul id="house" class="task-list"></ul>
+        </section>
+
+        <form id="task-form">
+            <input type="text" id="task-input" placeholder="Write a task..." required>
+            <select id="task-category">
+                <option value="design">DESIGN</option>
+                <option value="personal">PERSONAL</option>
+                <option value="house">HOUSE</option>
+            </select>
+            <button type="submit">Add</button>
+        </form>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
