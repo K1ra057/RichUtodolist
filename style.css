@@ -58,6 +58,9 @@ header h1 {
   flex: 1;
   font-size: 0.9rem;
   cursor: pointer;
+  overflow-wrap: break-word; /* Перенос длинных слов */
+  word-break: break-word; /* Перенос слов, если они слишком длинные */
+  white-space: normal; /* Разрешаем перенос текста на новую строку */
 }
 
 .task-list input[type="checkbox"] {
